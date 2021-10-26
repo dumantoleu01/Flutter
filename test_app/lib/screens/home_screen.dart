@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:test_app/db/currencies.dart';
 import 'package:test_app/db/notes_database.dart';
-import 'package:test_app/model/currency.dart';
 import 'package:test_app/model/note.dart';
 import 'package:test_app/screens/sortable_page.dart';
 import 'package:test_app/services/networking.dart';
@@ -13,69 +11,100 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // late List<Note> notes;
+  late String currSymbol;
+  late String currName;
+  late double currPrice;
 
-  // bool isLoading = false;
+  late List<Note> notes;
+  bool isLoading = false;
+  bool isRefreshed = false;
 
-  // late Note currency;
-  late Currencies currencies;
+  Future<void> refreshNotes() async {
+    setState(() => isLoading = true);
 
-  @override
-  void initState() {
-    super.initState();
+    this.notes = await NotesDatabase.instance.readAllNotes();
 
-    // refreshNotes();
-    getDataFromUrl();
+    setState(() {
+      isLoading = false;
+      isRefreshed = true;
+    });
+  }
+
+  Future updateNote(List<Note> notes, int index) async {
+    final note = notes[index].copy(
+      symbol: currSymbol,
+      name: currName,
+      price: currPrice,
+    );
+
+    await NotesDatabase.instance.update(note);
+  }
+
+  Future addNote() async {
+    final note = Note(
+      symbol: currSymbol,
+      name: currName,
+      price: currPrice,
+    );
+    await NotesDatabase.instance.create(note);
+  }
+
+  void addOrUpdateNote(List<Note> notes, int index) async {
+    // ignore: unnecessary_null_comparison
+    final isUpdating = notes.length > index ? true : false;
+
+    if (isUpdating) {
+      await updateNote(notes, index);
+    } else {
+      await addNote();
+    }
   }
 
   Future getDataFromUrl() async {
     Networking networking = Networking();
     dynamic curr = await networking.getData();
-    dynamic dates = curr["data"];
-    for (dynamic date in dates) {
-      currencies.addCurrency(date["symbol"], date["name"],
-          date["metrics"]["market_data"]["price_usd"]);
+    if (curr == "Internet connection lost") {
+      print("Internet connection lost");
+    } else {
+      dynamic date = curr["data"];
+      for (var i = 0; i < date.length; i++) {
+        // print(date[i]["symbol"]);
+        // print(date[i]["name"]);
+        // print(date[i]["metrics"]["market_data"]["price_usd"]);
+        currSymbol = date[i]["symbol"];
+        currName = date[i]["name"];
+        currPrice = date[i]["metrics"]["market_data"]["price_usd"];
+        addOrUpdateNote(notes, i);
+        // print(notes[i].name);
+      }
     }
   }
 
-  // Future refreshNotes() async {
-  //   setState(() => isLoading = true);
+  @override
+  // ignore: unused_element
+  void initState() {
+    refreshNotes();
+    getDataFromUrl();
 
-  //   this.notes = await NotesDatabase.instance.readAllNotes();
-
-  //   setState(() => isLoading = false);
-  // }
-
-  // void addOrUpdateNote(Note note) async {
-  //   final isUpdating = note != null;
-
-  //   if (isUpdating) {
-  //     await updateNote(note);
-  //   } else {
-  //     await addNote(note);
-  //   }
-  // }
-
-  // Future updateNote(Note note) async {}
-
-  // Future addNote(Note note) async {
-  //   await NotesDatabase.instance.create(note);
-  // }
+    super.initState();
+  }
 
   @override
-  Widget build(BuildContext context) => TabBarWidget(
-        title: "Test App",
-        tabs: [
-          Tab(icon: Icon(Icons.sort_by_alpha), text: 'Sortable'),
-          Tab(icon: Icon(Icons.select_all), text: 'Selectable'),
-          Tab(icon: Icon(Icons.edit), text: 'Editable'),
-        ],
-        children: [
-          SortablePage(
-            currencies: currencies,
-          ),
-          Container(),
-          Container(),
-        ],
-      );
+  Widget build(BuildContext context) {
+    return TabBarWidget(
+      title: "Test App",
+      tabs: [
+        Tab(icon: Icon(Icons.sort_by_alpha), text: 'Sortable'),
+      ],
+      children: [
+        isRefreshed
+            ? SortablePage(
+                currencies: notes,
+              )
+            : Center(
+                child: Text("Data is Loading..."),
+              ),
+      ],
+    );
+  }
 }

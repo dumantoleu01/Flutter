@@ -11,10 +11,10 @@ class Networking {
         print("1");
         return data;
       } else {
-        return {'rate': 100};
+        return "No data";
       }
     } catch (err) {
-      return "No data";
+      return "Internet connection lost";
     }
   }
 }

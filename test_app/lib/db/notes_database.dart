@@ -26,14 +26,14 @@ class NotesDatabase {
   Future _createDB(Database db, int version) async {
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const textType = 'TEXT NOT NULL';
-    const integerType = 'INTEGER NOT NULL';
+    const doubleType = 'DOUBLE NOT NULL';
 
     await db.execute('''
 CREATE TABLE $tableNotes ( 
   ${NoteFields.id} $idType, 
   ${NoteFields.symbol} $textType,
   ${NoteFields.name} $textType,
-  ${NoteFields.price} $integerType,
+  ${NoteFields.price} $doubleType
   )
 ''');
   }

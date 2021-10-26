@@ -1,26 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:test_app/db/currencies.dart';
-import 'package:test_app/model/currency.dart';
+import 'package:test_app/model/note.dart';
 import 'package:test_app/widget/scrollable_widget.dart';
 
 class SortablePage extends StatefulWidget {
-  final Currencies currencies;
+  final List<Note> currencies;
   SortablePage({required this.currencies});
   @override
   _SortablePageState createState() => _SortablePageState();
 }
 
 class _SortablePageState extends State<SortablePage> {
-  late List<Currency> users;
   int? sortColumnIndex;
   bool isAscending = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    this.users = List.of(widget.currencies.allData);
-  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -34,7 +25,7 @@ class _SortablePageState extends State<SortablePage> {
       sortAscending: isAscending,
       sortColumnIndex: sortColumnIndex,
       columns: getColumns(columns),
-      rows: getRows(users),
+      rows: getRows(widget.currencies),
     );
   }
 
@@ -45,8 +36,8 @@ class _SortablePageState extends State<SortablePage> {
           ))
       .toList();
 
-  List<DataRow> getRows(List<Currency> users) => users.map((Currency user) {
-        final cells = [user.symbol, user.name, user.price];
+  List<DataRow> getRows(List<Note> currencies) => currencies.map((Note curr) {
+        final cells = [curr.symbol, curr.name, curr.price];
 
         return DataRow(cells: getCells(cells));
       }).toList();
@@ -56,14 +47,14 @@ class _SortablePageState extends State<SortablePage> {
 
   void onSort(int columnIndex, bool ascending) {
     if (columnIndex == 0) {
-      users.sort((user1, user2) =>
-          compareString(ascending, user1.symbol, user2.symbol));
+      widget.currencies.sort((curr1, curr2) =>
+          compareString(ascending, curr1.symbol, curr2.symbol));
     } else if (columnIndex == 1) {
-      users.sort(
-          (user1, user2) => compareString(ascending, user1.name, user2.name));
+      widget.currencies.sort(
+          (curr1, curr2) => compareString(ascending, curr1.name, curr2.name));
     } else if (columnIndex == 2) {
-      users.sort((user1, user2) =>
-          compareString(ascending, '${user1.price}', '${user2.price}'));
+      widget.currencies.sort((curr1, curr2) =>
+          compareString(ascending, '${curr1.price}', '${curr2.price}'));
     }
 
     setState(() {

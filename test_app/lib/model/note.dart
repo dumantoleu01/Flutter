@@ -16,7 +16,7 @@ class Note {
   final int? id;
   final String symbol;
   final String name;
-  final int price;
+  final double price;
 
   const Note({
     this.id,
@@ -29,7 +29,7 @@ class Note {
     int? id,
     String? symbol,
     String? name,
-    int? price,
+    double? price,
   }) =>
       Note(
         id: id ?? this.id,
@@ -42,7 +42,7 @@ class Note {
         id: json[NoteFields.id] as int?,
         symbol: json[NoteFields.symbol] as String,
         name: json[NoteFields.name] as String,
-        price: json[NoteFields.price] as int,
+        price: json[NoteFields.price] as double,
       );
 
   Map<String, Object?> toJson() => {
