@@ -73,7 +73,10 @@ class _HomeScreenState extends State<HomeScreen> {
         // print(date[i]["metrics"]["market_data"]["price_usd"]);
         currSymbol = date[i]["symbol"];
         currName = date[i]["name"];
-        currPrice = date[i]["metrics"]["market_data"]["price_usd"];
+        currPrice = double.parse((date[i]["metrics"]["market_data"]
+                ["price_usd"])
+            .toStringAsFixed(5));
+        print(currPrice.runtimeType);
         addOrUpdateNote(notes, i);
         // print(notes[i].name);
       }

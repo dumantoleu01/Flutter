@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:test_app/model/note.dart';
 import 'package:test_app/widget/scrollable_widget.dart';
@@ -53,8 +55,8 @@ class _SortablePageState extends State<SortablePage> {
       widget.currencies.sort(
           (curr1, curr2) => compareString(ascending, curr1.name, curr2.name));
     } else if (columnIndex == 2) {
-      widget.currencies.sort((curr1, curr2) =>
-          compareString(ascending, '${curr1.price}', '${curr2.price}'));
+      widget.currencies.sort(
+          (curr1, curr2) => sortPrice(ascending, curr1.price, curr2.price));
     }
 
     setState(() {
@@ -65,4 +67,10 @@ class _SortablePageState extends State<SortablePage> {
 
   int compareString(bool ascending, String value1, String value2) =>
       ascending ? value1.compareTo(value2) : value2.compareTo(value1);
+
+  int sortPrice(bool ascending, double value1, double value2) => ascending
+      ? double.parse(value1.toString())
+          .compareTo(double.parse(value2.toString()))
+      : double.parse(value2.toString())
+          .compareTo(double.parse(value1.toString()));
 }
